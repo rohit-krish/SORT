@@ -45,15 +45,12 @@ def iou_batch(bb_1, bb_2):
     xx2 = np.minimum(bb_1[..., 2], bb_2[..., 2])
     yy2 = np.minimum(bb_1[..., 3], bb_2[..., 3])
 
-    w = np.maximum(0., xx2 - xx1)
-    h = np.maximum(0., yy2 - yy1)
-    wh = w * h
-    o = wh / (
-        (bb_1[..., 2] - bb_1[..., 0]) * (bb_1[..., 3] - bb_1[..., 1])
-        + (bb_2[..., 2] - bb_2[..., 0]) * (bb_2[..., 3] - bb_2[..., 1])
-        - wh
-    )
-    return (o)
+    interesection = np.maximum(0., xx2 - xx1) * np.maximum(0., yy2 - yy1)
+    area_bb1 = (bb_1[..., 2] - bb_1[..., 0]) * (bb_1[..., 3] - bb_1[..., 1])
+    area_bb2 = (bb_2[..., 2] - bb_2[..., 0]) * (bb_2[..., 3] - bb_2[..., 1])
+
+    iou = interesection / (area_bb1 + area_bb2 - interesection)
+    return iou
 
 
 def convert_bbox_to_z(bbox):
@@ -272,4 +269,4 @@ if __name__ == '__main__':
         [10, 10, 100, 100, 0.98]
     ])
     algo = Sort(max_age=50)
-    algo.update(dets)
+    res = algo.update(dets)
